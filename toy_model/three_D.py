@@ -1,10 +1,11 @@
+import numpy as np
+
 class Effusion():
     count = 0
 
     def __init__(self, file):
         self.trajectory = file
         self.effusion = []
-        self.effusion_rate = 0
         self.block = False
         self.bottom = 0.04
 
@@ -41,7 +42,6 @@ class Effusion():
         self.parse_cordinates(n, f)
 
     def run(self):
-        self.effusion_rate = 0
         self.effusion = []
         with open(self.trajectory, 'r') as rad:
             while True:
@@ -51,3 +51,10 @@ class Effusion():
                     break
                 assert(line == "ITEM: TIMESTEP\n")
                 self.header(rad)
+    @property
+    def effusion_rate(self):
+        eff = self.effusion[20:]
+        time = [i for i in range(len(eff))]
+        k, _ = np.polyfit(time, eff, 1)
+        return k
+    
