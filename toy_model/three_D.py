@@ -1,3 +1,5 @@
+import numpy as np
+
 class Effusion():
     count = 0
 
@@ -51,3 +53,10 @@ class Effusion():
                     break
                 assert(line == "ITEM: TIMESTEP\n")
                 self.header(rad)
+    @property
+    def effusion_rate(self):
+        eff = self.effusion[20:]
+        time = [i for i in range(eff)]
+        k, _ = np.polyfit(time, eff, 1)
+        return k
+    
