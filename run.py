@@ -3,5 +3,6 @@ import pylab
 
 eff = Effusion('dump.crack')
 eff.run()
-pylab.plot(eff.effusion)
-pylab.savefig('trial.png')
+pylab.plot(eff.channel_width[20:])
+pylab.savefig('channel_width.png')
+#print(eff.channel_width)

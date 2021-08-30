@@ -1,0 +1,193 @@
+LAMMPS (29 Oct 2020)
+#how to create a single plane of atoms
+
+dimension 3
+boundary p p p
+atom_style full
+lattice fcc 1.5
+Lattice spacing in x,y,z = 1.3867225 1.3867225 1.3867225
+region box block 0 30 0 30 0 50
+create_box 4 box bond/types 2 extra/bond/per/atom 4
+Created orthogonal box = (0.0000000 0.0000000 0.0000000) to (41.601676 41.601676 69.336127)
+  2 by 2 by 2 MPI processor grid
+
+mass 1 1.0
+mass 2 1.0
+mass 3 1.0
+mass 4 1.0
+
+#region command is general command to create a region, creat_box is a command to create the simulation box
+
+region bulk block 0 30 0 30 5 11
+create_atoms 4 random 12000 123 bulk #@@bulk
+Created 12000 atoms
+  create_atoms CPU = 0.003 seconds
+
+
+
+region lid block 0 30 0 30 11.5 11.6
+create_atoms 1 region lid units lattice
+Created 1800 atoms
+  create_atoms CPU = 0.002 seconds
+
+region channel1 block 0 30 0 30 4.0 4.1  #I changed here
+create_atoms 2 region channel1 units lattice
+Created 1800 atoms
+  create_atoms CPU = 0.003 seconds
+
+region void1 sphere 15 15 4.4 1.5 #@@hole_up
+#delete_atoms region void1
+region hole1 intersect 2 channel1 void1
+
+region interior block 0 30 0 30 2.5 3.0
+create_atoms 3 random 2000 123415 interior #@@interior
+Created 2000 atoms
+  create_atoms CPU = 0.002 seconds
+
+region channel2 block 0 30 0 30 2 2.1
+create_atoms 2 region channel2 units lattice
+Created 1800 atoms
+  create_atoms CPU = 0.007 seconds
+
+region void2 sphere 5 5 1.9 2 #@@hole_down
+#delete_atoms region void2
+region hole2 intersect 2 channel2 void2
+
+#define groups
+
+group lid type 1
+1800 atoms in group lid
+group channel1 region channel1
+1800 atoms in group channel1
+group channel2 region channel2
+1800 atoms in group channel2
+group bulk region bulk
+12000 atoms in group bulk
+
+#pair potential
+
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 1.0
+pair_coeff 2 2 2.4 1.0
+pair_coeff 3 3 1.0 1.0
+pair_coeff 4 4 1.0 1.0
+
+
+#create_bonds many channel channel 1 0.8 1
+
+bond_style harmonic
+bond_coeff 1 300 0.86
+bond_coeff 2 300 0.86
+
+#create_bonds many channel1 channel1 1 0.8 1
+create_bonds many lid lid 1 0.8 1
+Neighbor list info ...
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 30 30 50
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) command create_bonds, occasional
+      attributes: full, newton on
+      pair build: full/bin
+      stencil: full/bin/3d
+      bin: standard
+  (2) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+Added 3600 bonds, new total = 3600
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0.0      0.0      0.0     
+  special bond factors coul:  0.0      0.0      0.0     
+     4 = max # of 1-2 neighbors
+    12 = max # of 1-3 neighbors
+    48 = max # of 1-4 neighbors
+    24 = max # of special neighbors
+  special bonds CPU = 0.003 seconds
+velocity lid set 0.0 0.0 0.0
+velocity channel1 set 0 0 0
+velocity channel2 set 0 0 0
+#velocity bulk set 1 1 0
+
+
+fix fc channel1 setforce 0.0 0.0 0.0
+fix 3 channel2 setforce 0.0 0.0 0.0
+fix 2 lid setforce 0.0 0.0 0.0
+minimize 1.0e-4 1.0e-6 100 1000
+WARNING: Using 'neigh_modify every 1 delay 0 check yes' setting during minimization (../min.cpp:187)
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 2.8
+  ghost atom cutoff = 2.8
+  binsize = 1.4, bins = 30 30 50
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+WARNING: Inconsistent image flags (../domain.cpp:812)
+Per MPI rank memory allocation (min/avg/max) = 9.881 | 18.02 | 26.15 Mbytes
+Step Temp E_pair E_mol TotEng Press 
+       0            0 4.8997584e+13   0.80916132 4.8997584e+13 3.1685104e+13 
+     100            0   -5.0482821   0.80916132   -4.2391208   0.33402548 
+Loop time of 0.880021 on 8 procs for 100 steps with 19400 atoms
+
+94.8% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = max iterations
+  Energy initial, next-to-last, final = 
+      48997584191343.1  -4.23105272950153  -4.23912076265045
+  Force two-norm initial, final = 4.4333279e+20 210.29950
+  Force max component initial, final = 2.3707851e+20 30.625944
+  Final line search alpha, max atom move = 0.0028840161 0.088325715
+  Iterations, force evaluations = 100 136
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 6.6e-05    | 0.19112    | 0.39808    |  43.8 | 21.72
+Bond    | 3.5e-05    | 0.000705   | 0.00148    |   0.0 |  0.08
+Neigh   | 0.20526    | 0.2059     | 0.20656    |   0.1 | 23.40
+Comm    | 0.21485    | 0.31754    | 0.41793    |  15.4 | 36.08
+Output  | 5.5e-05    | 5.9625e-05 | 8.8e-05    |   0.0 |  0.01
+Modify  | 7e-05      | 0.0013558  | 0.002672   |   3.5 |  0.15
+Other   |            | 0.1633     |            |       | 18.56
+
+Nlocal:        2425.00 ave        4894 max           0 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+Nghost:        1914.62 ave        3084 max         761 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+Neighs:        75697.4 ave      154657 max           0 min
+Histogram: 4 0 0 0 0 0 0 0 0 4
+
+Total # of neighbors = 605579
+Ave neighs/atom = 31.215412
+Ave special neighs/atom = 2.2268041
+Neighbor list builds = 25
+Dangerous builds = 0
+unfix 2
+timestep 0.003
+thermo 200
+dump 1 all atom 5000 dump.crack
+
+reset_atom_ids
+Resetting atom IDs ...
+Finding 1-2 1-3 1-4 neighbors ...
+  special bond factors lj:    0.0      0.0      0.0     
+  special bond factors coul:  0.0      0.0      0.0     
+     4 = max # of 1-2 neighbors
+    12 = max # of 1-3 neighbors
+    48 = max # of 1-4 neighbors
+    24 = max # of special neighbors
+  special bonds CPU = 0.003 seconds
+velocity bulk create 1 1234 #@@velocity_placeholder
+
+#fix
+fix 2 lid addforce 0.0 0.0 -9 #@@fp_pressure
+log nve.out

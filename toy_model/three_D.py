@@ -6,9 +6,9 @@ class Effusion():
     def __init__(self, file):
         self.trajectory = file
         self.effusion = []
-        self.effusion_rate = 0
         self.block = False
         self.bottom = 0.04
+        self.channel_width = []
 
     def parse_cordinates(self, n, f):
         fluid = []
@@ -28,6 +28,9 @@ class Effusion():
         piston_height = sum(piston)/len(piston)
         escaped_atom = [i for i in fluid if i < self.bottom or i > piston_height]
         self.effusion.append(len(escaped_atom))
+        channel_up = np.array(channel_up)
+
+        self.channel_width.append(channel_up.mean())
 
 
 
@@ -43,7 +46,6 @@ class Effusion():
         self.parse_cordinates(n, f)
 
     def run(self):
-        self.effusion_rate = 0
         self.effusion = []
         with open(self.trajectory, 'r') as rad:
             while True:
@@ -56,7 +58,7 @@ class Effusion():
     @property
     def effusion_rate(self):
         eff = self.effusion[20:]
-        time = [i for i in range(eff)]
+        time = [i for i in range(len(eff))]
         k, _ = np.polyfit(time, eff, 1)
         return k
     

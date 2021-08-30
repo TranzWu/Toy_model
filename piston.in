@@ -1,0 +1,103 @@
+#how to create a single plane of atoms
+
+dimension 3
+boundary p p p
+atom_style full
+lattice fcc 1.5
+region box block 0 30 0 30 0 50
+create_box 4 box bond/types 2 extra/bond/per/atom 4
+
+mass 1 1.0
+mass 2 1.0
+mass 3 1.0
+mass 4 1.0
+
+#region command is general command to create a region, creat_box is a command to create the simulation box
+
+region bulk block 0 30 0 30 5 11
+create_atoms 4 random 12000 123 bulk #@@bulk
+
+
+
+region lid block 0 30 0 30 11.5 11.6
+create_atoms 1 region lid units lattice
+
+region channel1 block 0 30 0 30 4.0 4.1  #I changed here
+create_atoms 2 region channel1 units lattice
+
+region void1 sphere 15 15 4.4 1.5 #@@hole_up
+#delete_atoms region void1
+region hole1 intersect 2 channel1 void1
+
+region interior block 0 30 0 30 2.5 3.0
+create_atoms 3 random 2000 123415 interior #@@interior
+
+region channel2 block 0 30 0 30 2 2.1
+create_atoms 2 region channel2 units lattice
+
+region void2 sphere 5 5 1.9 2 #@@hole_down
+#delete_atoms region void2
+region hole2 intersect 2 channel2 void2
+
+#define groups
+
+group lid type 1
+group channel1 region channel1
+group channel2 region channel2
+group bulk region bulk
+
+#pair potential
+
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 1.0
+pair_coeff 2 2 2.4 1.0
+pair_coeff 3 3 1.0 1.0
+pair_coeff 4 4 1.0 1.0
+
+
+#create_bonds many channel channel 1 0.8 1
+
+bond_style harmonic
+bond_coeff 1 300 0.86
+bond_coeff 2 300 0.86
+
+#create_bonds many channel1 channel1 1 0.8 1
+create_bonds many lid lid 1 0.8 1
+velocity lid set 0.0 0.0 0.0
+velocity channel1 set 0 0 0
+velocity channel2 set 0 0 0
+#velocity bulk set 1 1 0
+
+
+fix fc channel1 setforce 0.0 0.0 0.0
+fix 3 channel2 setforce 0.0 0.0 0.0
+fix 2 lid setforce 0.0 0.0 0.0
+minimize 1.0e-4 1.0e-6 100 1000
+unfix 2
+timestep 0.003
+thermo 200
+dump 1 all atom 5000 dump.crack
+
+reset_atom_ids
+velocity bulk create 1 1234 #@@velocity_placeholder
+
+#fix
+fix 2 lid addforce 0.0 0.0 -9 #@@fp_pressure
+log nve.out
+fix 1 all nve
+
+
+
+run 10000
+
+unfix 1
+unfix fc
+
+delete_atoms region hole1
+delete_atoms region hole2
+thermo_modify lost ignore
+
+create_bonds many channel1 channel1 1 0.8 1
+fix 1 all nve
+
+run 250000
