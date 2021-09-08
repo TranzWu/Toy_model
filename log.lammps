@@ -9,7 +9,7 @@ Lattice spacing in x,y,z = 1.3867225 1.3867225 1.3867225
 region box block 0 30 0 30 0 50
 create_box 4 box bond/types 2 extra/bond/per/atom 4
 Created orthogonal box = (0.0000000 0.0000000 0.0000000) to (41.601676 41.601676 69.336127)
-  2 by 2 by 2 MPI processor grid
+  1 by 2 by 2 MPI processor grid
 
 mass 1 1.0
 mass 2 1.0
@@ -21,19 +21,19 @@ mass 4 1.0
 region bulk block 0 30 0 30 5 11
 create_atoms 4 random 12000 123 bulk #@@bulk
 Created 12000 atoms
-  create_atoms CPU = 0.003 seconds
+  create_atoms CPU = 0.001 seconds
 
 
 
 region lid block 0 30 0 30 11.5 11.6
 create_atoms 1 region lid units lattice
 Created 1800 atoms
-  create_atoms CPU = 0.002 seconds
+  create_atoms CPU = 0.001 seconds
 
 region channel1 block 0 30 0 30 4.0 4.1  #I changed here
 create_atoms 2 region channel1 units lattice
 Created 1800 atoms
-  create_atoms CPU = 0.003 seconds
+  create_atoms CPU = 0.002 seconds
 
 region void1 sphere 15 15 4.4 1.5 #@@hole_up
 #delete_atoms region void1
@@ -42,12 +42,12 @@ region hole1 intersect 2 channel1 void1
 region interior block 0 30 0 30 2.5 3.0
 create_atoms 3 random 2000 123415 interior #@@interior
 Created 2000 atoms
-  create_atoms CPU = 0.002 seconds
+  create_atoms CPU = 0.000 seconds
 
 region channel2 block 0 30 0 30 2 2.1
 create_atoms 2 region channel2 units lattice
 Created 1800 atoms
-  create_atoms CPU = 0.007 seconds
+  create_atoms CPU = 0.004 seconds
 
 region void2 sphere 5 5 1.9 2 #@@hole_down
 #delete_atoms region void2
@@ -106,7 +106,7 @@ Finding 1-2 1-3 1-4 neighbors ...
     12 = max # of 1-3 neighbors
     48 = max # of 1-4 neighbors
     24 = max # of special neighbors
-  special bonds CPU = 0.003 seconds
+  special bonds CPU = 0.002 seconds
 velocity lid set 0.0 0.0 0.0
 velocity channel1 set 0 0 0
 velocity channel2 set 0 0 0
@@ -131,43 +131,43 @@ Neighbor list info ...
       stencil: half/bin/3d/newton
       bin: standard
 WARNING: Inconsistent image flags (../domain.cpp:812)
-Per MPI rank memory allocation (min/avg/max) = 9.881 | 18.02 | 26.15 Mbytes
+Per MPI rank memory allocation (min/avg/max) = 10.93 | 18.60 | 26.27 Mbytes
 Step Temp E_pair E_mol TotEng Press 
        0            0 4.8997584e+13   0.80916132 4.8997584e+13 3.1685104e+13 
-     100            0   -5.0482821   0.80916132   -4.2391208   0.33402548 
-Loop time of 0.880021 on 8 procs for 100 steps with 19400 atoms
+     100            0   -5.0483096   0.80916132   -4.2391483   0.33400906 
+Loop time of 0.76931 on 4 procs for 100 steps with 19400 atoms
 
-94.8% CPU use with 8 MPI tasks x no OpenMP threads
+98.5% CPU use with 4 MPI tasks x no OpenMP threads
 
 Minimization stats:
   Stopping criterion = max iterations
   Energy initial, next-to-last, final = 
-      48997584191343.1  -4.23105272950153  -4.23912076265045
-  Force two-norm initial, final = 4.4333279e+20 210.29950
-  Force max component initial, final = 2.3707851e+20 30.625944
-  Final line search alpha, max atom move = 0.0028840161 0.088325715
+      48997584191343.3  -4.23107964861764  -4.23914831143554
+  Force two-norm initial, final = 4.4333279e+20 210.25643
+  Force max component initial, final = 2.3707851e+20 30.607954
+  Final line search alpha, max atom move = 0.0028829481 0.088241143
   Iterations, force evaluations = 100 136
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 6.6e-05    | 0.19112    | 0.39808    |  43.8 | 21.72
-Bond    | 3.5e-05    | 0.000705   | 0.00148    |   0.0 |  0.08
-Neigh   | 0.20526    | 0.2059     | 0.20656    |   0.1 | 23.40
-Comm    | 0.21485    | 0.31754    | 0.41793    |  15.4 | 36.08
-Output  | 5.5e-05    | 5.9625e-05 | 8.8e-05    |   0.0 |  0.01
-Modify  | 7e-05      | 0.0013558  | 0.002672   |   3.5 |  0.15
-Other   |            | 0.1633     |            |       | 18.56
+Pair    | 3.7e-05    | 0.2321     | 0.4849     |  48.3 | 30.17
+Bond    | 2.7e-05    | 0.00078    | 0.001562   |   0.0 |  0.10
+Neigh   | 0.23175    | 0.23195    | 0.23211    |   0.0 | 30.15
+Comm    | 0.013202   | 0.25456    | 0.49619    |  43.9 | 33.09
+Output  | 4.1e-05    | 4.375e-05  | 5.2e-05    |   0.0 |  0.01
+Modify  | 3.4e-05    | 0.0019935  | 0.004054   |   4.4 |  0.26
+Other   |            | 0.04789    |            |       |  6.22
 
-Nlocal:        2425.00 ave        4894 max           0 min
-Histogram: 4 0 0 0 0 0 0 0 0 4
-Nghost:        1914.62 ave        3084 max         761 min
-Histogram: 4 0 0 0 0 0 0 0 0 4
-Neighs:        75697.4 ave      154657 max           0 min
-Histogram: 4 0 0 0 0 0 0 0 0 4
+Nlocal:        4850.00 ave        9786 max           0 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:        2882.75 ave        4448 max        1346 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Neighs:       151394.0 ave      308933 max           0 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
 
-Total # of neighbors = 605579
-Ave neighs/atom = 31.215412
+Total # of neighbors = 605577
+Ave neighs/atom = 31.215309
 Ave special neighs/atom = 2.2268041
 Neighbor list builds = 25
 Dangerous builds = 0
@@ -185,7 +185,7 @@ Finding 1-2 1-3 1-4 neighbors ...
     12 = max # of 1-3 neighbors
     48 = max # of 1-4 neighbors
     24 = max # of special neighbors
-  special bonds CPU = 0.003 seconds
+  special bonds CPU = 0.001 seconds
 velocity bulk create 1 1234 #@@velocity_placeholder
 
 #fix

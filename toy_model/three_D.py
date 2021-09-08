@@ -61,8 +61,8 @@ class Effusion():
         time = [i for i in range(len(eff))]
         k, _ = np.polyfit(time, eff, 1)
         return k
-<<<<<<< HEAD
-    
-=======
-    
->>>>>>> 52ff74fc71cdaebc5e77eb82f8687ce840a2d7d2
+
+    @property
+    def avg_channel_width(self):
+        return np.array(self.channel_width[20:]).mean()
+
